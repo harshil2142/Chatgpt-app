@@ -228,7 +228,6 @@ const App: React.FC = () => {
           </ResizablePanelGroup>
         </div>
       </div>
-      <ToastContainer />
       {/* <div className="">
         <div className="w-70">
           <div className="grid grid-cols-2 h-20 gap-2 p-2">
@@ -303,7 +302,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </div> */}
-    </ToastContainer>
+    </>
   );
 };
 
