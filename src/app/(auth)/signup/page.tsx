@@ -10,21 +10,24 @@ import { z } from "zod";
 import { get } from "lodash";
 import { formSchema } from "./schema";
 
-export default function Signin() {
+export default function Signup() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      department: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     const payload = {
+      name: data.name,
       email: data.email,
       password: data.password,
+      department: data.department,
     };
-
     console.log(payload);
   }
 
@@ -42,12 +45,27 @@ export default function Signin() {
         >
           <div>
             <div className="w-full text-center mb-4 text-3xl font-extrabold">
-              Sign in
+              Sign Up
             </div>
             <div className="pt-2">
               <Form {...form}>
                 <form className="" onSubmit={form.handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-8">
+                    <InputWrapper
+                      required
+                      className={`rounded-lg border border-solid ${
+                        get(errors, "name", false)
+                          ? "border-2 border-destructive"
+                          : "border-input"
+                      }  p-3`}
+                      form={form}
+                      name="name"
+                      placeholder="User Name"
+                      renderComponent={(props: any) => (
+                        <Input {...props} type="text" />
+                      )}
+                      title="User Name"
+                    />
                     <InputWrapper
                       required
                       className={`rounded-lg border border-solid ${
@@ -77,6 +95,21 @@ export default function Signin() {
                         <Input {...props} type="password" />
                       )}
                       title="Password"
+                    />
+                    <InputWrapper
+                      required
+                      className={`rounded-lg border border-solid ${
+                        get(errors, "name", false)
+                          ? "border-2 border-destructive"
+                          : "border-input"
+                      }  p-3`}
+                      form={form}
+                      name="department"
+                      placeholder="Department"
+                      renderComponent={(props: any) => (
+                        <Input {...props} type="text" />
+                      )}
+                      title="Department Name"
                     />
                   </div>
                   <Button className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">

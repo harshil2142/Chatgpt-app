@@ -34,7 +34,7 @@ export default function FileUpload() {
       {/* <h1 className="text-5xl mb-10">File Upload</h1> */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2 xl:justify-start w-auto">
+          <div className="">
             {/* <FormLabel className="text-lg">Upload PDF</FormLabel> */}
             <FileUploader
               bucket={process.env.NEXT_PUBLIC_AWS_S3_BUCKET!}
