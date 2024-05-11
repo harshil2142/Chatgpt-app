@@ -11,7 +11,7 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import InputWrapper from "@/components/InputWrapper";
 import { Input } from "@/components/ui/input";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import FileUpload from "../components/fileupload/page";
 import {
   ResizablePanelGroup,
@@ -19,6 +19,7 @@ import {
   ResizablePanel,
 } from "@/components/ui/resizable";
 import { ToastContainer } from "react-toastify";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
@@ -204,23 +205,20 @@ const App: React.FC = () => {
             <ResizableHandle withHandle />
             <ResizablePanel>
               <div className="w-[100%] pe-4">
-                <div className="w-full border-[#3bb34d] border-2 rounded-xl mx-3 h-[95vh]">
-                  <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mx-3">
-                    <ul className="flex flex-wrap -mb-px">
-                      <li className="me-2">
-                        <div className="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
-                          HISTORY
-                        </div>
-                      </li>
-                      <li className="me-2">
-                        <div
-                          className="inline-block p-4 text-[#3bb34d] border-b-2 border-[#3bb34d] rounded-t-lg active dark:text-[#3bb34d] dark:font-medium dark:border-[#3bb34d] "
-                          aria-current="page"
-                        >
-                          PDF
-                        </div>
-                      </li>
-                    </ul>
+                <div className="w-full border-[#3bb34d] border-2 rounded-xl h-[95vh]">
+                  <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+                    <Tabs defaultValue="pdf" className="w-[100%] p-4">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="history">
+                          <div>HISTORY</div>
+                        </TabsTrigger>
+                        <TabsTrigger value="pdf">
+                          <div>PDF</div>
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="history">history</TabsContent>
+                      <TabsContent value="pdf">pdf</TabsContent>
+                    </Tabs>
                   </div>
                 </div>
               </div>
