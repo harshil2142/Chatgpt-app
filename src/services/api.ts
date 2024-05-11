@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const HOST = process.env.NEXT_PUBLIC_API_HOST;
-const API = "/api/v1";
-export const baseUrl = `${HOST}${API}`;
+export const baseUrl = `${HOST}`;
 
 async function getHeaders(extraHeaders = {}) {
   let token = null;
@@ -12,8 +11,7 @@ async function getHeaders(extraHeaders = {}) {
     ...extraHeaders,
   };
   try {
-    const session = await Auth.currentSession();
-    token = session.getAccessToken().getJwtToken();
+    const token = localStorage.getItem('token')
   } catch (e) {
     console.log(e);
   }
@@ -60,8 +58,8 @@ export async function postRequest({
       headers,
     });
     return response;
-  } catch (error) {
-    throw new Error(`${error}`);
+  } catch (error:any) {
+    throw new Error(`${error.message}`);
   }
 }
 

@@ -9,6 +9,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { get } from "lodash";
 import { formSchema } from "./schema";
+import { postRequest } from "@/services/api";
+import { toast } from "react-toastify";
 
 export default function Signin() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -24,8 +26,14 @@ export default function Signin() {
       email: data.email,
       password: data.password,
     };
-
-    console.log(payload);
+    
+    try {
+      const res = await postRequest({data : {...payload} , url : "/api/login"})
+      console.log(res,"res")
+    } catch (error:any) {
+      toast.error(error?.message || "something went wrong")
+    }
+    
   }
 
   const {
@@ -36,8 +44,7 @@ export default function Signin() {
   return (
     <div className="h-screen flex justify-center flex-col">
       <div className="flex justify-center">
-        <a
-          href="#"
+        <div
           className="block w-2/5 p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 "
         >
           <div>
@@ -86,7 +93,7 @@ export default function Signin() {
               </Form>
             </div>
           </div>
-        </a>
+        </div>
       </div>
     </div>
   );

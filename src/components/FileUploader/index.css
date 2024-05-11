@@ -17,6 +17,10 @@
   left: 0;
 }
 
+.filepond--root{
+  margin-bottom: 0;
+}
+
 /* .filepond--image-preview-overlay.filepond--image-preview-overlay-idle::after {
   content: "";
   width: 200px;

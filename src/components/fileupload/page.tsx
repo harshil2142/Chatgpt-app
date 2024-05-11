@@ -30,12 +30,10 @@ export default function FileUpload() {
   }
 
   return (
-    <div className="w-auto flex justify-center items-center flex-col">
-      {/* <h1 className="text-5xl mb-10">File Upload</h1> */}
+    <div className="w-[300px] flex justify-center items-center flex-col">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="">
-            {/* <FormLabel className="text-lg">Upload PDF</FormLabel> */}
+          <div className="flex flex-col gap-2 xl:justify-start w-[300px]">
             <FileUploader
               bucket={process.env.NEXT_PUBLIC_AWS_S3_BUCKET!}
               fileRenameFunction={({
@@ -73,7 +71,6 @@ export default function FileUpload() {
               }}
             />
           </div>
-          {/* <Button type="submit">Submit</Button> */}
         </form>
       </Form>
     </div>
