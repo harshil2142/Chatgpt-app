@@ -130,7 +130,16 @@ export default function Signup() {
                     Sign in
                   </Button>
                 </form>
-              </Form>
+              </Form> 
+              <p className="text-center mt-4">
+              Already User ?{" "}
+              <span
+                className="text-blue-500 cursor-pointer"
+                onClick={() => router.push("/signin")}
+              >
+                Sign In
+              </span>
+            </p>
             </div>
           </div>
         </div>

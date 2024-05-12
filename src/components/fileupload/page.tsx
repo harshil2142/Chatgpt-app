@@ -70,7 +70,8 @@ export default function FileUpload(props:any) {
                 props.setPdfDataUrl(fileUrl)
                 const res = await postRequest({url : "/history/get-summury" , data : {pdfUrl : fileUrl}})
                 if(res?.data?.success){
-                  props.setSummuryState(res?.data?.summury)
+                  props.resetStateHndler()
+                  props.setSummaryState(res?.data?.summury)
                 }
                 return form.setValue("imageUrl", fileUrl);
               }}

@@ -34,7 +34,7 @@ const App: React.FC = () => {
   const userId = localStorage.getItem("userId")
 
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
-  const [summaryState, setSummaryState] = useState<any>("")
+  const [summaryState, setSummaryState] = useState<any>(null)
   const [promptListState, setPromptListState] = useState<any>([])
   const [historyState, setHistoryState] = useState<any>([])
 
@@ -70,6 +70,11 @@ const App: React.FC = () => {
       prompt: data.prompt,
     };
     console.log(payload);
+  }
+
+  const resetStateHndler = ()=>{
+    // setHistoryState([])
+    setPromptListState([])
   }
 
   const setHistoryHndler = (index: number) => {
@@ -135,7 +140,7 @@ const App: React.FC = () => {
                 <div className="flex h-[15vh] mt-[2%]">
                   <div className="w-full border-[#3bb34d] border-2 rounded-xl mx-3 flex justify-center items-center">
                     <div className="flex justify-center items-center">
-                      <FileUpload setSummaryState={setSummaryState} setPdfDataUrl={setPdfDataUrl} />
+                      <FileUpload setSummaryState={setSummaryState} setPdfDataUrl={setPdfDataUrl} resetStateHndler={resetStateHndler} />
                     </div>
                     <Form {...form}>
                       <form
@@ -211,7 +216,7 @@ const App: React.FC = () => {
                           {/* <Document file={"https://www.clickdimensions.com/links/TestPDFfile.pdf"} >
                             <Page pageNumber={1}  />
                           </Document> */}
-                          <PdfViewer pdfUrl={"https://www.clickdimensions.com/links/TestPDFfile.pdf"} initialPage={1} />
+                          <PdfViewer pdfUrl={"https://pdf-data1.s3.amazonaws.com/pdf-data1/pdf/1715460558252/2022-NEE-ESG-Report-Final-1-.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA2UC3DYOX3NY4VQ5F%2F20240512%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20240512T100902Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=663170d19431952963ad4b1ca9b9a889f5f11a149324b1a9e86b7c68a45548aa"} initialPage={1} />
                           
                         </div>
                       </TabsContent>

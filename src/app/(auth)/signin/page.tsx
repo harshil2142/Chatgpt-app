@@ -41,6 +41,8 @@ export default function Signin() {
         localStorage.setItem('token',res?.data?.token)
         localStorage.setItem('userId',res?.data?._id)
         router.push("/")
+      }else{
+        setLoading(false)
       }
     
     
@@ -101,6 +103,15 @@ export default function Signin() {
                   </Button>
                 </form>
               </Form>
+              <p className="text-center mt-4">
+              Don't have an account?{" "}
+              <span
+                className="text-blue-500 cursor-pointer"
+                onClick={() => router.push("/signup")}
+              >
+                Sign up
+              </span>
+            </p>
             </div>
           </div>
         </div>
