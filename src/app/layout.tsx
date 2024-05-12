@@ -5,7 +5,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { usePathname } from "next/navigation";
+import { usePathname,useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isAccess, setIsAccess] = useState<boolean>(false)
   const pathName = usePathname();
-  console.log(pathName,"router")
+  const router = useRouter()
+  const token = localStorage.getItem("token")
+
+  useEffect(() => {
+    if (pathName === "/") {
+      if (token) { setIsAccess(true) } 
+      else { 
+        setIsAccess(false)
+        localStorage.clear()
+        router.push("/signin")
+       }
+    }else{
+      setIsAccess(true)
+    }
+  }, [pathName])
+
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      { isAccess ?  <body className={inter.className}>{children}</body> : <></>}
       <ToastContainer />
     </html>
   );

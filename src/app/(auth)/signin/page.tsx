@@ -12,10 +12,12 @@ import { formSchema } from "./schema";
 import { postRequest } from "@/services/api";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Signin() {
 
   const router = useRouter()
+  const [loading, setLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -25,6 +27,7 @@ export default function Signin() {
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setLoading(true)
     const payload = {
       email: data.email,
       password: data.password,
@@ -33,6 +36,7 @@ export default function Signin() {
       const res = await postRequest({data : {...payload} , url : "/api/login"})
       console.log(res,"res")
       if(res){
+        setLoading(false)
         toast.success("Login Successfully.")
         localStorage.setItem('token',res?.data?.token)
         localStorage.setItem('userId',res?.data?._id)
@@ -92,7 +96,7 @@ export default function Signin() {
                       title="Password"
                     />
                   </div>
-                  <Button className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+                  <Button disabled={loading} className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                     Sign in
                   </Button>
                 </form>

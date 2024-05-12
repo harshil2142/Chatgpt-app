@@ -9,8 +9,16 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { get } from "lodash";
 import { formSchema } from "./schema";
+import { postRequest } from "@/services/api";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Signup() {
+
+  const router = useRouter()
+  const [loading, setLoading] = useState<boolean>(false)
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -22,13 +30,20 @@ export default function Signup() {
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setLoading(true)
     const payload = {
       name: data.name,
       email: data.email,
       password: data.password,
       department: data.department,
     };
-    console.log(payload);
+   
+    const res = await postRequest({data : {...payload} , url : "/api/register"})
+    setLoading(false)
+      if(res){
+        toast.success("Registration Successfully.")
+        router.push("/signin")
+      }
   }
 
   const {
@@ -39,8 +54,7 @@ export default function Signup() {
   return (
     <div className="h-screen flex justify-center flex-col">
       <div className="flex justify-center">
-        <a
-          href="#"
+        <div
           className="block w-2/5 p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 "
         >
           <div>
@@ -112,14 +126,14 @@ export default function Signup() {
                       title="Department Name"
                     />
                   </div>
-                  <Button className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+                  <Button disabled={loading} className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                     Sign in
                   </Button>
                 </form>
               </Form>
             </div>
           </div>
-        </a>
+        </div>
       </div>
     </div>
   );
