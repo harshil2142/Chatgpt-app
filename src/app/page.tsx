@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import InputWrapper from "@/components/InputWrapper";
 import { Input } from "@/components/ui/input";
 import "react-toastify/dist/ReactToastify.css";
+import { Document, Page } from 'react-pdf';
 import FileUpload from "../components/fileupload/page";
 import {
   ResizablePanelGroup,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/resizable";
 import { ToastContainer } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getRequest } from "@/services/api";
+import PdfViewer from "@/components/PdfViewer/PdfViewer";
 
 const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
@@ -28,25 +31,28 @@ const dropzoneStyle: React.CSSProperties = {
 };
 
 const App: React.FC = () => {
+  const userId = localStorage.getItem("userId")
+
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
+  const [summaryState, setSummaryState] = useState<any>("")
+  const [promptListState, setPromptListState] = useState<any>([])
+  const [historyState, setHistoryState] = useState<any>([])
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    const reader = new FileReader();
+  // const [isToggled, setIsToggled] = useState(true);
 
-    reader.onloadend = () => {
-      setPdfDataUrl(reader.result as string);
-    };
+  const fetchHistory = async () => {
+    const response: any = await getRequest({ url: "/history/get", params: { userId, page: 1, size: 7 } })
+    setHistoryState(response?.data?.data)
+  }
 
-    reader.readAsDataURL(file);
-  }, []);
+  useEffect(() => {
+    fetchHistory()
+  }, [])
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
-  const [isToggled, setIsToggled] = useState(true);
 
-  const handleToggle = () => {
-    setIsToggled(!isToggled);
-  };
+  // const handleToggle = () => {
+  //   setIsToggled(!isToggled);
+  // };
 
   const formSchema = z.object({
     prompt: z.string(),
@@ -64,6 +70,13 @@ const App: React.FC = () => {
       prompt: data.prompt,
     };
     console.log(payload);
+  }
+
+  const setHistoryHndler = (index: number) => {
+    const data = historyState[index];
+    setPromptListState(data?.history)
+    setSummaryState(data?.summary)
+    setPdfDataUrl(data?.pdfUrl)
   }
 
   return (
@@ -103,25 +116,31 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex h-[60vh] mt-[2%]">
                   <div className="w-[30%] border-[#3bb34d] border-2 rounded-xl mx-3 flex justify-center items-center">
-                    <div className="flex justify-center items-center  ">
-                      <ul>
-                        <li>this is a summury</li>
-                        <li>this is a summury</li>
-                        <li>this is a summury</li>
-                      </ul>
+                    <div className="flex justify-center items-center text-center ">
+                      {summaryState || "No Summury Found"}
                     </div>
                   </div>
-                  <div className="w-[70%] border-[#3bb34d] border-2 rounded-xl mx-3"></div>
+                  <div className="w-[70%] border-[#3bb34d] border-2 rounded-xl mx-3">
+                    {(promptListState || [])?.map((item: any, index: number) => (
+                      <>
+                        <div className="flex flex-col border-gray-400 border-2 my-3 overflow-y-auto p-3 rounded-2xl text-sm mx-3">
+                          {/* <div>{index}</div> */}
+                          <div>propmpt : {item?.prompt}</div>
+                          <div>answer : {item?.response}</div>
+                        </div>
+                      </>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex h-[15vh] mt-[2%]">
                   <div className="w-full border-[#3bb34d] border-2 rounded-xl mx-3 flex justify-center items-center">
-                    <div className="flex justify-center items-center  ">
-                      <FileUpload />
+                    <div className="flex justify-center items-center">
+                      <FileUpload setSummaryState={setSummaryState} setPdfDataUrl={setPdfDataUrl} />
                     </div>
                     <Form {...form}>
                       <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="p-4 m-auto"
+                        className="p-4 m-auto flex justify-center items-center"
                       >
                         <div className="relative">
                           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -146,78 +165,56 @@ const App: React.FC = () => {
                             id="search"
                             className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50  dark:text-white "
                             placeholder="Search"
-                            required
                           />
-                          <button
-                            type="submit"
-                            className="text-white absolute end-2.5 bottom-2.5 bg-[#3bb34d] hover:gray focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-[#3bb34d] dark:hover:gray"
-                          >
-                            Search
-                          </button>
+
                         </div>
+                        <button
+                          type="submit"
+                          className="text-white bg-[#3bb34d] hover:gray focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-[#3bb34d] dark:hover:gray ms-3"
+                        >
+                          Search
+                        </button>
                       </form>
                     </Form>
                   </div>
-                  {/* <div className="w-[70%] border-[#3bb34d] border-2 rounded-xl mx-3">
-                    <Form {...form}>
-                      <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="p-4 m-auto"
-                      >
-                        <div className="relative">
-                          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg
-                              className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                              aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                              />
-                            </svg>
-                          </div>
-                          <input
-                            type="search"
-                            id="search"
-                            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50  dark:text-white "
-                            placeholder="Search"
-                            required
-                          />
-                          <button
-                            type="submit"
-                            className="text-white absolute end-2.5 bottom-2.5 bg-[#3bb34d] hover:gray focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-[#3bb34d] dark:hover:gray"
-                          >
-                            Search
-                          </button>
-                        </div>
-                      </form>
-                    </Form>
-                  </div> */}
+
                 </div>
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel>
-              <div className="w-[100%] pe-4">
+              <div className="w-[100%] px-4">
                 <div className="w-full border-[#3bb34d] border-2 rounded-xl h-[95vh]">
                   <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
-                    <Tabs defaultValue="pdf" className="w-[100%] p-4">
+                    <Tabs defaultValue="history" className="w-[100%] p-4">
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="history">
-                          <div>HISTORY</div>
+                          <div>
+                            HISTORY
+                          </div>
                         </TabsTrigger>
                         <TabsTrigger value="pdf">
                           <div>PDF</div>
                         </TabsTrigger>
                       </TabsList>
-                      <TabsContent value="history">history</TabsContent>
-                      <TabsContent value="pdf">pdf</TabsContent>
+                      <TabsContent value="history">
+                        {historyState?.map((item: any, index: number) => (
+                          <div className="w-full border-2 border-gray-300 rounded-2xl h-10 mt-3 flex justify-center items-center cursor-pointer hover:bg-slate-50" onClick={() => {
+                            setHistoryHndler(index)
+                          }}>
+                            {item?.summary}
+                          </div>
+                        ))}
+                      </TabsContent>
+                      <TabsContent value="pdf">
+                        <div>
+                          {/* <Document file={"https://www.clickdimensions.com/links/TestPDFfile.pdf"} >
+                            <Page pageNumber={1}  />
+                          </Document> */}
+                          <PdfViewer pdfUrl={"https://www.clickdimensions.com/links/TestPDFfile.pdf"} initialPage={1} />
+                          
+                        </div>
+                      </TabsContent>
                     </Tabs>
                   </div>
                 </div>
@@ -226,80 +223,8 @@ const App: React.FC = () => {
           </ResizablePanelGroup>
         </div>
       </div>
-      {/* <div className="">
-        <div className="w-70">
-          <div className="grid grid-cols-2 h-20 gap-2 p-2">
-            <div className="h-full flex items-center justify-center">
-              <Switch checked={isToggled} onCheckedChange={handleToggle} />
-              {isToggled ? <div>heloo one</div> : <div>heloo two</div>}
-            </div>
-            <div className="h-full flex items-center">
-              <div className="grid grid-cols-2 gap-2">
-                {[1, 2, 3, 4].map((_, index) => (
-                  <div key={index}>
-                    What is today&apos;s most ask question ? I can suggest You.
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 h-55 p-2 gap-2">
-            <div className="h-full flex flex-col justify-start">
-              <div>
-                - Lorem Ipsum is simply dummy text of the printing and
-                typesetting industry. Lorem Ipsum 1500s
-              </div>
-              <div>
-                - It is a long established fact that a reader will be distracted
-                by the readable content of arem Ipsum is th
-              </div>
-              <div>
-                - making it look like readable English. Many desktop publishing
-                packages and web page editors now use L
-              </div>
-            </div>
-            <div className="h-full flex items-center justify-center">
-              Content
-            </div>
-          </div>
-          <div className="grid grid-cols-2 h-10 p-2 gap-2">
-            <div className="h-full">
-              <div {...getRootProps()} style={dropzoneStyle}>
-                <input {...getInputProps()} />
-                <p>Drag &apos;n&apos; drop some files here</p>
-              </div>
-            </div>
-            <div className="h-full">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <InputWrapper
-                    form={form}
-                    name="prompt"
-                    placeholder="write a prompt"
-                    title="Prompt"
-                    renderComponent={(props: any) => <Input {...props} />}
-                  />
-                  <Button className="mt-4">Submit</Button>
-                </form>
-              </Form>
-            </div>
-          </div>
-        </div>
-        <div className="w-30">
-          <div className="h-90 w-full p-2">
-            <div>
-              {pdfDataUrl && (
-                <embed
-                  src={pdfDataUrl}
-                  type="application/pdf"
-                  width="100%"
-                  height="600px"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </div> */}
+
+      <ToastContainer />
     </>
   );
 };

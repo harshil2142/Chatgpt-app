@@ -11,8 +11,11 @@ import { get } from "lodash";
 import { formSchema } from "./schema";
 import { postRequest } from "@/services/api";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function Signin() {
+
+  const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -27,12 +30,15 @@ export default function Signin() {
       password: data.password,
     };
     
-    try {
       const res = await postRequest({data : {...payload} , url : "/api/login"})
       console.log(res,"res")
-    } catch (error:any) {
-      toast.error(error?.message || "something went wrong")
-    }
+      if(res){
+        toast.success("Login Successfully.")
+        localStorage.setItem('token',res?.data?.token)
+        localStorage.setItem('userId',res?.data?._id)
+        router.push("/")
+      }
+    
     
   }
 

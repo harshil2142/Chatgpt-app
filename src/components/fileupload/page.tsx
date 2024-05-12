@@ -8,8 +8,9 @@ import FileUploader from "@/components/FileUploader";
 import { stripSpecialCharacters } from "@/constants/constants";
 import generateS3FileUrl from "@/constants/s3-url-generate";
 import { Button } from "@/components/ui/button";
+import { getRequest, postRequest } from "@/services/api";
 
-export default function FileUpload() {
+export default function FileUpload(props:any) {
   const formSchema = z.object({
     imageUrl: z.string(),
   });
@@ -58,7 +59,7 @@ export default function FileUpload() {
                 // setImagePreviewUrl(null);
                 return form.setValue("imageUrl", name);
               }}
-              onUploadComplete={({ fileName }) => {
+              onUploadComplete={async({ fileName }) => {
                 let fileUrl = generateS3FileUrl({
                   s3BucketName: process.env.NEXT_PUBLIC_AWS_S3_BUCKET!,
                   s3KeyName: fileName,
@@ -66,7 +67,11 @@ export default function FileUpload() {
                 // Update the image preview URL
                 // setImagePreviewUrl(fileUrl);
                 // Set the image URL in the form
-                console.log("fileUrl", fileUrl);
+                props.setPdfDataUrl(fileUrl)
+                const res = await postRequest({url : "/history/get-summury" , data : {pdfUrl : fileUrl}})
+                if(res?.data?.success){
+                  props.setSummuryState(res?.data?.summury)
+                }
                 return form.setValue("imageUrl", fileUrl);
               }}
             />

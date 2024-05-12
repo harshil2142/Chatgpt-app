@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const HOST = process.env.NEXT_PUBLIC_API_HOST;
 export const baseUrl = `${HOST}`;
@@ -11,7 +12,7 @@ async function getHeaders(extraHeaders = {}) {
     ...extraHeaders,
   };
   try {
-    const token = localStorage.getItem('token')
+    token = localStorage.getItem('token')
   } catch (e) {
     console.log(e);
   }
@@ -26,20 +27,27 @@ async function getHeaders(extraHeaders = {}) {
 export async function getRequest({
   extraHeaders = {},
   url,
+  params = {},
   cache = "default",
 }: {
   extraHeaders?: object;
+  params?: object;
   url: string;
   // eslint-disable-next-line no-undef
   cache?: RequestCache | undefined;
 }) {
   const headers = await getHeaders(extraHeaders);
 
-  const response = await fetch(`${baseUrl}${url}`, {
+ try{
+  const response = await axios.get(`${baseUrl}${url}`, {
     headers,
-    cache: cache,
-  });
+    params,
+});
   return response;
+ }
+  catch (error:any) {
+    toast.error(error?.response?.data?.message)
+  }
 }
 
 export async function postRequest({
@@ -59,7 +67,7 @@ export async function postRequest({
     });
     return response;
   } catch (error:any) {
-    throw new Error(`${error.message}`);
+    toast.error(error?.response?.data?.message)
   }
 }
 
