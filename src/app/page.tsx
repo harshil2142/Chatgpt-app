@@ -19,7 +19,7 @@ import {
   ResizableHandle,
   ResizablePanel,
 } from "@/components/ui/resizable";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
@@ -84,6 +84,16 @@ const App: React.FC = () => {
     setPdfDataUrl(data?.pdfUrl)
   }
 
+  const handleCopy = async (text:any) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Text copied to clipboard!');
+    } catch (error) {
+
+      toast.error('Failed to copy text. Please try again.');
+    }
+  };
+
   return (
     <>
       {/* <div className="flex items-center justify-between h-9">
@@ -128,10 +138,11 @@ const App: React.FC = () => {
                   <div className="w-[70%] border-[#3bb34d] border-2 rounded-xl mx-3">
                     {(promptListState || [])?.map((item: any, index: number) => (
                       <>
-                        <div className="flex flex-col border-gray-400 border-2 my-3 overflow-y-auto p-3 rounded-2xl text-sm mx-3">
+                        <div className="flex flex-col border-gray-400 border-2 my-3 overflow-y-auto px-3 pt-3 rounded-2xl text-sm mx-3">
                           {/* <div>{index}</div> */}
                           <div>propmpt : {item?.prompt}</div>
                           <div>answer : {item?.response}</div>
+                          <button onClick={() => handleCopy(item?.response)} className="ms-auto border-gray-400 rounded-xl p-2 me-[-12px] bg-gray-100 hover:bg-gray-200">Copy Answer</button>
                         </div>
                       </>
                     ))}
@@ -216,7 +227,7 @@ const App: React.FC = () => {
                           {/* <Document file={"https://www.clickdimensions.com/links/TestPDFfile.pdf"} >
                             <Page pageNumber={1}  />
                           </Document> */}
-                          <PdfViewer pdfUrl={"https://pdf-data1.s3.amazonaws.com/pdf-data1/pdf/1715460558252/2022-NEE-ESG-Report-Final-1-.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA2UC3DYOX3NY4VQ5F%2F20240512%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20240512T100902Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=663170d19431952963ad4b1ca9b9a889f5f11a149324b1a9e86b7c68a45548aa"} initialPage={1} />
+                          <PdfViewer pdfUrl={ "https://pdf-data1.s3.ap-south-1.amazonaws.com/pdf-data1/pdf/1715427188300/lorem-ipsum.pdf"} initialPage={1} />
                           
                         </div>
                       </TabsContent>
