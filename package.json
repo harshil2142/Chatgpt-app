@@ -37,8 +37,11 @@
     "react-pdf": "^8.0.2",
     "react-resizable-panels": "^2.0.19",
     "react-toastify": "^10.0.5",
+    "remixicon": "^4.2.0",
+    "sharp": "^0.33.4",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "universal-cookie": "^7.1.4",
     "zod": "^3.23.7"
   },
   "devDependencies": {
