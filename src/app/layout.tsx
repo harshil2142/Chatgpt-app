@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { usePathname,useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Cookies from 'universal-cookie';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,15 +23,18 @@ export default function RootLayout({
 }>) {
   const [isAccess, setIsAccess] = useState<boolean>(false)
   const pathName = usePathname();
+  const cookies = new Cookies();
   const router = useRouter()
-  const token = localStorage.getItem("token")
+  // const token = localStorage.getItem("token")
+  const token = cookies.get("token")
 
   useEffect(() => {
     if (pathName === "/") {
       if (token) { setIsAccess(true) } 
       else { 
         setIsAccess(false)
-        localStorage.clear()
+        cookies.remove("token")
+        cookies.remove("userId")
         router.push("/signin")
        }
     }else{

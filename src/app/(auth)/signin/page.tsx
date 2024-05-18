@@ -13,6 +13,7 @@ import { postRequest } from "@/services/api";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Cookies from "universal-cookie";
 
 export default function Signin() {
 
@@ -38,8 +39,10 @@ export default function Signin() {
       if(res){
         setLoading(false)
         toast.success("Login Successfully.")
-        localStorage.setItem('token',res?.data?.token)
-        localStorage.setItem('userId',res?.data?._id)
+        const cookies = new Cookies();
+        cookies.set("token",res?.data?.token)
+        cookies.set('userId',res?.data?._id)
+        
         router.push("/")
       }else{
         setLoading(false)

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import Cookies from "universal-cookie";
 
 const HOST = process.env.NEXT_PUBLIC_API_HOST;
 export const baseUrl = `${HOST}`;
@@ -12,7 +13,8 @@ async function getHeaders(extraHeaders = {}) {
     ...extraHeaders,
   };
   try {
-    token = localStorage.getItem('token')
+    const cookies = new Cookies();
+    token = cookies.get('token')
   } catch (e) {
     console.log(e);
   }

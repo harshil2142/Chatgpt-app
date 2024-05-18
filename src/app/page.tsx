@@ -26,6 +26,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
+import Cookies from "universal-cookie";
 
 const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
@@ -34,7 +35,8 @@ const dropzoneStyle: React.CSSProperties = {
 };
 
 const App: React.FC = () => {
-  const userId = localStorage.getItem("userId")
+  const cookies = new Cookies();
+  const userId = cookies.get("userId")
 
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<any>(null)
@@ -49,8 +51,10 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    fetchHistory()
-  }, [])
+    if(userId){
+      fetchHistory()
+    }
+  }, [userId])
 
 
   // const handleToggle = () => {
@@ -366,7 +370,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="h-[60vh] mt-4 bg-white rounded-2xl flex flex-col">
-               PDF
+                <PdfViewer pdfUrl={"https://pdf-data1.s3.ap-south-1.amazonaws.com/pdf-data1/pdf/1715427188300/lorem-ipsum.pdf"} initialPage={1} />
                 </div>
               </div>
             </ResizablePanel>
