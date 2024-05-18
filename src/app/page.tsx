@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import "remixicon/fonts/remixicon.css";
 import Logo from "/public/logo.png";
 import Avatar from "/public/avatar.png";
 import Chatgpt from "/public/chatgpt.png";
-import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import InputWrapper from "@/components/InputWrapper";
-import { Input } from "@/components/ui/input";
 import "react-toastify/dist/ReactToastify.css";
-import { Document, Page } from "react-pdf";
 import FileUpload from "../components/fileupload/page";
 import {
   ResizablePanelGroup,
@@ -23,7 +18,6 @@ import {
   ResizablePanel,
 } from "@/components/ui/resizable";
 import { ToastContainer, toast } from "react-toastify";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
 import Cookies from "universal-cookie";
@@ -275,7 +269,7 @@ const App: React.FC = () => {
               <div className="w-[100%] p-4 flex flex-col justify-between bg-[#F6F6F6] h-screen">
                 <div className=" p-3 h-[40vh] bg-white rounded-2xl flex flex-col">
                   <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
-                    {`Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum`}
+                    {summaryState}
                   </div>
                   <div className="mt-2 flex justify-center">
                     <FileUpload

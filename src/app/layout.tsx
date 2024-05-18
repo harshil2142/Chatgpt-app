@@ -45,7 +45,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      {isAccess ? <body className={inter.className}>{children}</body> : <></>}
+      {isAccess ? <body className={inter.className}>{children}</body> : <body></body>}
       <ToastContainer />
     </html>
   );

@@ -32,13 +32,15 @@ const getS3File = (url: string) => {
     signatureVersion: "v4",
     region: process.env.NEXT_PUBLIC_AWS_REGION,
   });
-  const { bucket, key } = AmazonS3URI(url);
-
-  const newUrl = url
-    ? getSignedUrl({ bucketName: bucket, prefixPath: key })
-    : undefined;
-
-  return newUrl;
+  if(url){
+    const { bucket, key } = AmazonS3URI(url);
+  console.log(url,"url")
+    const newUrl = url
+      ? getSignedUrl({ bucketName: bucket, prefixPath: key })
+      : undefined;
+  
+    return newUrl;
+  }
 };
 
 export default getS3File;
