@@ -220,7 +220,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="overflow-y-auto h-[50vh]">
                       {(historyState)?.map((item: any, index: number) => (
-                        <div className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black" onClick={() => {
+                        <div key={index} className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black" onClick={() => {
                           setHistoryHndler(index)
                         }}>
                           {/* {item?.summary} */}
@@ -359,7 +359,7 @@ const App: React.FC = () => {
               <div className="w-[100%] p-4 flex flex-col justify-between bg-[#F6F6F6] h-screen">
                 <div className=" p-3 h-[40vh] bg-white rounded-2xl flex flex-col">
                   <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
-                  Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum
+                  {`Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum`}
                   </div>
                   <div className="mt-2 flex justify-center">
                   <FileUpload setSummaryState={setSummaryState} setPdfDataUrl={setPdfDataUrl} resetStateHndler={resetStateHndler} />
