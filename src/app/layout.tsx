@@ -3,9 +3,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { usePathname, useRouter } from "next/navigation";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -28,25 +28,29 @@ export default function RootLayout({
   // const token = localStorage.getItem("token")
   const token = cookies.get("token");
 
-  useEffect(() => {
-    if (pathName === "/") {
-      if (token) {
-        setIsAccess(true);
-      } else {
-        setIsAccess(false);
-        cookies.remove("token");
-        cookies.remove("userId");
-        router.push("/signin");
-      }
-    } else {
-      setIsAccess(true);
-    }
-  }, [pathName]);
+  // useEffect(() => {
+  //   if (pathName === "/") {
+  //     if (token) {
+  //       setIsAccess(true);
+  //     } else {
+  //       setIsAccess(false);
+  //       cookies.remove("token");
+  //       cookies.remove("userId");
+  //       router.push("/signin");
+  //     }
+  //   } else {
+  //     setIsAccess(true);
+  //   }
+  // }, [pathName]);
+
+  if (!token && pathName !== "/signin" && pathName !== "/signup") {
+    redirect("/signin");
+  }
 
   return (
     <html lang="en">
-      {isAccess ? <body className={inter.className}>{children}</body> : <></>}
-      <ToastContainer />
+      <body className={inter.className}>{children}</body>
+      {/* <ToastContainer /> */}
     </html>
   );
 }

@@ -28,6 +28,7 @@ import { getRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
 import Cookies from "universal-cookie";
 import getS3File from "@/constants/get-aws-url";
+import { redirect } from "next/navigation";
 
 const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
@@ -38,6 +39,11 @@ const dropzoneStyle: React.CSSProperties = {
 const App: React.FC = () => {
   const cookies = new Cookies();
   const userId = cookies.get("userId");
+  const token = cookies.get("token");
+
+  if (!token) {
+    redirect("/signin");
+  }
 
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<any>(null);
