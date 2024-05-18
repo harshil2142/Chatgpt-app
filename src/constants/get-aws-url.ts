@@ -1,5 +1,5 @@
-import AmazonS3URI from 'amazon-s3-uri';
-import AWS from 'aws-sdk';
+import AmazonS3URI from "amazon-s3-uri";
+import AWS from "aws-sdk";
 
 AWS.config.logger = console;
 
@@ -9,13 +9,12 @@ const getSignedUrl = ({
 }: {
   bucketName: any;
   prefixPath: any;
-  }) => {
-  
-    AWS.config.update({
-      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY,
-      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-      region: process.env.NEXT_PUBLIC_AWS_REGION,
-    });
+}) => {
+  AWS.config.update({
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    region: process.env.NEXT_PUBLIC_AWS_REGION,
+  });
   const s3 = new AWS.S3();
   const params = {
     Bucket: bucketName,
@@ -23,14 +22,14 @@ const getSignedUrl = ({
     Expires: 86400, // Expiration time in seconds (e.g., 24 hour)
   };
 
-  const url = s3.getSignedUrl('getObject', params);
+  const url = s3.getSignedUrl("getObject", params);
 
   return url;
 };
 
 const getS3File = (url: string) => {
   AWS.config.update({
-    signatureVersion: 'v4',
+    signatureVersion: "v4",
     region: process.env.NEXT_PUBLIC_AWS_REGION,
   });
   const { bucket, key } = AmazonS3URI(url);

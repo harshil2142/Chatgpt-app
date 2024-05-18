@@ -1,44 +1,36 @@
-import getS3File from '@/constants/get-aws-url';
-import React, { useState, useEffect } from 'react';
-import { Document, Page ,pdfjs } from 'react-pdf';
+// src/PdfViewer.js
+import React, { useEffect, useState } from "react";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 
-pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const PdfViewer = ({ url, initialPage }: any) => {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const pageNavigationPluginInstance = pageNavigationPlugin();
+  const { jumpToPage } = pageNavigationPluginInstance;
 
+  const [page, setPage] = useState(initialPage);
 
-const App = ({ s3Url }:any) => {
-  const [numPages, setNumPages] = useState(0);
+  useEffect(() => {
+    if (page !== undefined && jumpToPage) {
+      jumpToPage(page);
+    }
+  }, [page, jumpToPage]);
 
-  const onDocumentLoadSuccess = ({ numPages }: any) => {
-    setNumPages(numPages);
-  };
-  console.log(numPages,"numPages")
   return (
-    <div className='overflow-auto'>
-      
-        <Document
-          file={{url : s3Url}}
-          onLoadSuccess={onDocumentLoadSuccess}
-        >
-          {/* <Page  pageNumber={2} width={window.innerWidth} /> */}
-          {[...Array(numPages)].map((_, index) => (
-          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={window.innerWidth} />
-        ))}
-        </Document>
-      
-      {/* <p>Page {pageNumber} of {numPages}</p> */}
+    <div className="h-[60vh] w-full">
+      <Worker
+        workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}
+      >
+        <Viewer
+          fileUrl={url}
+          plugins={[defaultLayoutPluginInstance, pageNavigationPluginInstance]}
+        />
+      </Worker>
     </div>
   );
 };
 
-// Usage
-export default function PdfViewer ({pdfUrl,initialPage }:any) {
-  const s3Url = pdfUrl;
-console.log(s3Url)
-  return (
-    <div>
-      <h1>PDF Viewer</h1>
-      <App s3Url={getS3File(pdfUrl)} />
-      {/* <iframe src={getS3File(pdfUrl)} title='description' className='h-[80vh] w-full' ></iframe> */}
-    </div>
-  );
-};
+export default PdfViewer;

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { usePathname,useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Cookies from 'universal-cookie';
+import Cookies from "universal-cookie";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,30 +21,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isAccess, setIsAccess] = useState<boolean>(false)
+  const [isAccess, setIsAccess] = useState<boolean>(false);
   const pathName = usePathname();
   const cookies = new Cookies();
-  const router = useRouter()
+  const router = useRouter();
   // const token = localStorage.getItem("token")
-  const token = cookies.get("token")
+  const token = cookies.get("token");
 
   useEffect(() => {
     if (pathName === "/") {
-      if (token) { setIsAccess(true) } 
-      else { 
-        setIsAccess(false)
-        cookies.remove("token")
-        cookies.remove("userId")
-        router.push("/signin")
-       }
-    }else{
-      setIsAccess(true)
+      if (token) {
+        setIsAccess(true);
+      } else {
+        setIsAccess(false);
+        cookies.remove("token");
+        cookies.remove("userId");
+        router.push("/signin");
+      }
+    } else {
+      setIsAccess(true);
     }
-  }, [pathName])
+  }, [pathName]);
 
   return (
     <html lang="en">
-      { isAccess ?  <body className={inter.className}>{children}</body> : <></>}
+      {isAccess ? <body className={inter.className}>{children}</body> : <></>}
       <ToastContainer />
     </html>
   );
