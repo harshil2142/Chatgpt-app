@@ -38,12 +38,16 @@ export default function Signup() {
       department: data.department,
     };
    
-    const res = await postRequest({data : {...payload} , url : "/api/register"})
-    setLoading(false)
+    try {
+      const res = await postRequest({data : {...payload} , url : "/api/register"})
       if(res){
         toast.success("Registration Successfully.")
         router.push("/signin")
       }
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+    }
   }
 
   const {
@@ -127,7 +131,7 @@ export default function Signup() {
                     />
                   </div>
                   <Button disabled={loading} className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
-                    Sign in
+                  { loading ?  <div className="loader w-5 h-5 border-4 border-t-4 border-gray-400 rounded-full animate-spin"></div> :  "Sign up"}
                   </Button>
                 </form>
               </Form> 

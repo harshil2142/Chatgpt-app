@@ -34,19 +34,20 @@ export default function Signin() {
       password: data.password,
     };
     
+     try {
       const res = await postRequest({data : {...payload} , url : "/api/login"})
-      console.log(res,"res")
       if(res){
-        setLoading(false)
         toast.success("Login Successfully.")
         const cookies = new Cookies();
         cookies.set("token",res?.data?.token)
         cookies.set('userId',res?.data?._id)
         
         router.push("/")
-      }else{
-        setLoading(false)
       }
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+     }
     
     
   }
@@ -102,7 +103,7 @@ export default function Signin() {
                     />
                   </div>
                   <Button disabled={loading} className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
-                    Sign in
+                    { loading ?  <div className="loader w-5 h-5 border-4 border-t-4 border-gray-400 rounded-full animate-spin"></div> :  "Sign in"}
                   </Button>
                 </form>
               </Form>

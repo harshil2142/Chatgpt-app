@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import "remixicon/fonts/remixicon.css";
 import Logo from "/public/logo.png";
@@ -18,7 +18,7 @@ import {
   ResizablePanel,
 } from "@/components/ui/resizable";
 import { ToastContainer, toast } from "react-toastify";
-import { getRequest } from "@/services/api";
+import { getRequest, patchRequest, postRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
 import Cookies from "universal-cookie";
 import getS3File from "@/constants/get-aws-url";
@@ -41,10 +41,14 @@ const App: React.FC = () => {
 
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
   const [promptListState, setPromptListState] = useState<any>([]);
   const [historyState, setHistoryState] = useState<any>([]);
+  const [activeHistory, setActiveHistory] = useState<any>(undefined)
 
-  // const [isToggled, setIsToggled] = useState(true);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const fetchHistory = async () => {
     const response: any = await getRequest({
@@ -60,9 +64,11 @@ const App: React.FC = () => {
     }
   }, [userId]);
 
-  // const handleToggle = () => {
-  //   setIsToggled(!isToggled);
-  // };
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [promptListState]);
 
   const formSchema = z.object({
     prompt: z.string(),
@@ -92,6 +98,7 @@ const App: React.FC = () => {
     setPromptListState(data?.history);
     setSummaryState(data?.summary);
     setPdfDataUrl(data?.pdfUrl);
+    setActiveHistory(data)
   };
 
   const handleCopy = async (text: any) => {
@@ -103,7 +110,65 @@ const App: React.FC = () => {
     }
   };
 
-  const [page, setPage] = useState(2);
+  const handleKeyDown = async (e: any) => {
+    if (e.key === 'Enter') {
+      setLoading(true);
+      if (promptListState?.length === 0) {
+      try {
+        const response: any = await postRequest({
+          url: "/history/create",
+          data: {
+            summary: summaryState,
+            userId: userId,
+            pdfUrl: pdfDataUrl,
+            prompt: e.target.value
+          },
+        });
+        if (response?.data) {
+          fetchHistory()
+          setPromptListState(response?.data?.history?.history)
+          setActiveHistory(response?.data?.history?.history[0])
+        }
+        setLoading(false)
+      } catch (error) {
+        setLoading(false)
+      }
+      } else {
+        try {
+          const response: any = await patchRequest({
+            url: "/history/update",
+            data: {
+              historyId: activeHistory?._id,
+              chatHistory: promptListState?.slice(-3),
+              prompt: e.target.value
+            },
+          });
+          if (response?.data) {
+            fetchHistory()
+            setPromptListState(response?.data?.history?.history)
+          }
+          setLoading(false)
+        } catch (error) {
+          setLoading(false)
+        }
+      }
+    }
+  };
+
+  const pageNoApiCall = async(response:any)=>{
+    const res: any = await postRequest({
+      url: "/history/get-pageno",
+      data: {
+        pdfUrl: pdfDataUrl,
+        response,
+      },
+    });
+    if (response?.data) {
+      setPage(res?.data?.pageNo);
+    }
+  }
+
+
 
   return (
     <>
@@ -123,7 +188,11 @@ const App: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Button className="mt-4 w-[90%] me-4 text-start">
+                      <Button className="mt-4 w-[90%] me-4 text-start" onClick={() => {
+                        resetStateHndler()
+                        setPdfDataUrl("")
+                        setSummaryState("")
+                      }}>
                         <div className="flex justify-start items-center">
                           <i className="ri-add-line text-white mx-3"></i>
                           Start New Chat
@@ -177,8 +246,8 @@ const App: React.FC = () => {
                         <i className="ri-upload-2-line text-lg cursor-pointer"></i>
                       </div>
                     </div>
-                    <div className="my-3 p-3 h-[70vh] bg-white rounded-2xl flex flex-col overflow-y-auto">
-                      {promptListState?.map((item: any, index: any) => (
+                    <div ref={chatContainerRef} className="my-3 p-3 h-[70vh] bg-white rounded-2xl flex flex-col overflow-y-auto">
+                      {(promptListState || [])?.map((item: any, index: any) => (
                         <>
                           <div className="flex flex-col">
                             <div className="flex">
@@ -204,16 +273,16 @@ const App: React.FC = () => {
                           </div>
                           <div className="flex flex-col my-6">
                             <div className="flex">
-                              <div>
+                              <div className="w-[7%]">
                                 <Image
-                                  className="w-10 h-10 rounded-full"
+                                  className="rounded-full"
                                   src={Chatgpt}
-                                  width={400}
+                                  width={40}
                                   height={400}
                                   alt="chatgpt"
                                 />
                               </div>
-                              <div className="flex flex-col ms-2">
+                              <div className="flex flex-col ms-2 w-[90%]">
                                 <div className="text-lg">
                                   Design Verification AI
                                 </div>
@@ -223,21 +292,22 @@ const App: React.FC = () => {
                                 <div className="text-base text-[#666D80] mb-2">
                                   {item?.response}
                                 </div>
-                                <div
-                                  onClick={() => {
+                                <div className="flex">
+                                  <i onClick={() => {
                                     navigator.clipboard.writeText(
                                       item?.response
                                     );
                                     toast.success("text copied.");
-                                  }}
-                                >
-                                  <i className="ri-clipboard-line text-base cursor-pointer"></i>
+                                  }} className="ri-clipboard-line text-base cursor-pointer"></i>
+
+                                  <i onClick={()=>pageNoApiCall(item?.response)} className="ri-pages-line text-base cursor-pointer ms-2"></i>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </>
                       ))}
+                      <div ref={bottomRef}></div>
                     </div>
                   </div>
                   <div className="flex flex-col">
@@ -246,9 +316,14 @@ const App: React.FC = () => {
                         type="text"
                         className="w-full py-2 pl-4 pr-10 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm "
                         placeholder="Message Design Verification AI..."
+                        onKeyDown={handleKeyDown}
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer">
-                        <i className="ri-send-plane-fill w-5 h-5 text-gray-400"></i>
+                        {loading ? (
+                          <div className="loader w-5 h-5 border-4 border-t-4 border-gray-400 rounded-full animate-spin"></div>
+                        ) : (
+                          <i className="ri-send-plane-fill w-5 h-5 text-gray-400"></i>
+                        )}
                       </div>
                     </div>
                     <div className="mb-3 text-[#666D80] ">
@@ -271,7 +346,7 @@ const App: React.FC = () => {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>
-              
+
               <div className="w-[100%] p-4 flex flex-col justify-between bg-[#F6F6F6] h-screen">
                 <div className=" p-3 h-[40vh] bg-white rounded-2xl flex flex-col">
                   <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
