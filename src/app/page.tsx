@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import "remixicon/fonts/remixicon.css";
 import Logo from "/public/logo.png";
@@ -44,7 +44,7 @@ const App: React.FC = () => {
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [text , setText ] = useState<any>("")
+  const [text, setText] = useState<any>("");
   const [pageLoading, setPageLoading] = useState<any>({
     loading: false,
     index: 0,
@@ -52,10 +52,12 @@ const App: React.FC = () => {
   const [page, setPage] = useState(0);
   const [promptListState, setPromptListState] = useState<any>([]);
   const [historyState, setHistoryState] = useState<any>([]);
-  const [activeHistory, setActiveHistory] = useState<any>(undefined)
+  const [activeHistory, setActiveHistory] = useState<any>(undefined);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const url = useMemo(() => getS3File(pdfDataUrl!), [pdfDataUrl]);
 
   const fetchHistory = async () => {
     const response: any = await getRequest({
@@ -73,7 +75,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [promptListState]);
 
@@ -105,7 +107,7 @@ const App: React.FC = () => {
     setPromptListState(data?.history);
     setSummaryState(data?.summary);
     setPdfDataUrl(data?.pdfUrl);
-    setActiveHistory(data)
+    setActiveHistory(data);
   };
 
   const handleCopy = async (text: any) => {
@@ -118,8 +120,10 @@ const App: React.FC = () => {
   };
 
   const handleKeyDown = async (e: any, name: any) => {
-    if (((name === "key" && e.key === 'Enter') || name === "click") && e.target.value) {
-      setPage(0)
+    const isEnterKey = name === "key" && e.key === "Enter" && e.target.value;
+    const isClickEvent = name === "click" && text;
+    if (isEnterKey || isClickEvent) {
+      setPage(0);
       setLoading(true);
       if (promptListState?.length === 0) {
         try {
@@ -129,18 +133,18 @@ const App: React.FC = () => {
               summary: summaryState,
               userId: userId,
               pdfUrl: pdfDataUrl,
-              prompt: e.target.value
+              prompt: e.target.value || text,
             },
           });
           if (response?.data) {
-            fetchHistory()
-            setPromptListState(response?.data?.history?.history)
-            setActiveHistory(response?.data?.history?.history[0])
-            setText("")
+            fetchHistory();
+            setPromptListState(response?.data?.history?.history);
+            setActiveHistory(response?.data?.history?.history[0]);
+            setText("");
           }
-          setLoading(false)
+          setLoading(false);
         } catch (error) {
-          setLoading(false)
+          setLoading(false);
         }
       } else {
         try {
@@ -149,17 +153,17 @@ const App: React.FC = () => {
             data: {
               historyId: activeHistory?._id,
               chatHistory: promptListState?.slice(-3),
-              prompt: e.target.value
+              prompt: e.target.value || text,
             },
           });
           if (response?.data) {
-            fetchHistory()
-            setText("")
-            setPromptListState(response?.data?.history?.history)
+            fetchHistory();
+            setText("");
+            setPromptListState(response?.data?.history?.history);
           }
-          setLoading(false)
+          setLoading(false);
         } catch (error) {
-          setLoading(false)
+          setLoading(false);
         }
       }
     }
@@ -169,7 +173,7 @@ const App: React.FC = () => {
     setPageLoading({
       loading: true,
       index: index,
-    })
+    });
     try {
       const res: any = await postRequest({
         url: "/history/get-pageno",
@@ -184,20 +188,20 @@ const App: React.FC = () => {
       setPageLoading({
         loading: false,
         index: 0,
-      })
+      });
     } catch (error) {
       setPageLoading({
         loading: false,
         index: 0,
-      })
+      });
     }
-  }
+  };
 
   const logoutHndler = () => {
-    cookies.remove("token")
-    cookies.remove("userId")
-    router.refresh()
-  }
+    cookies.remove("token");
+    cookies.remove("userId");
+    router.refresh();
+  };
 
   return (
     <>
@@ -217,11 +221,14 @@ const App: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Button className="mt-4 w-[90%] me-4 text-start" onClick={() => {
-                        resetStateHndler()
-                        setPdfDataUrl("")
-                        setSummaryState("")
-                      }}>
+                      <Button
+                        className="mt-4 w-[90%] me-4 text-start"
+                        onClick={() => {
+                          resetStateHndler();
+                          setPdfDataUrl("");
+                          setSummaryState("");
+                        }}
+                      >
                         <div className="flex justify-start items-center">
                           <i className="ri-add-line text-white mx-3"></i>
                           Start New Chat
@@ -235,17 +242,23 @@ const App: React.FC = () => {
                       {historyState?.map((item: any, index: number) => (
                         <div
                           key={index}
-                          className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black truncate" title={Array.isArray(historyState) && historyState.length > 0 && (
-                            historyState[index]?.history[0]?.pdfName || ""
-                          )}
+                          className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black truncate"
+                          title={
+                            Array.isArray(historyState) &&
+                            historyState.length > 0 &&
+                            (historyState[index]?.history[0]?.pdfName || "")
+                          }
                           onClick={() => {
                             setHistoryHndler(index);
                           }}
                         >
                           {/* {item?.summary} */}
-                          <span className="mx-2"> {Array.isArray(historyState) && historyState.length > 0 && (
-                            historyState[index]?.history[0]?.pdfName || ""
-                          )}</span>
+                          <span className="mx-2">
+                            {" "}
+                            {Array.isArray(historyState) &&
+                              historyState.length > 0 &&
+                              (historyState[index]?.history[0]?.pdfName || "")}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -263,7 +276,10 @@ const App: React.FC = () => {
                       <i className="ri-settings-5-line text-[#666D80] me-3 text-lg"></i>
                       Setting
                     </div>
-                    <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2" onClick={logoutHndler}>
+                    <div
+                      className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2"
+                      onClick={logoutHndler}
+                    >
                       <i className="ri-logout-box-r-line text-[#666D80] me-3 text-lg"></i>
                       Logout
                     </div>
@@ -279,7 +295,10 @@ const App: React.FC = () => {
                         <i className="ri-upload-2-line text-lg cursor-pointer"></i>
                       </div>
                     </div>
-                    <div ref={chatContainerRef} className="my-3 p-3 h-[70vh] bg-white rounded-2xl flex flex-col overflow-y-auto">
+                    <div
+                      ref={chatContainerRef}
+                      className="my-3 p-3 h-[70vh] bg-white rounded-2xl flex flex-col overflow-y-auto"
+                    >
                       {(promptListState || [])?.map((item: any, index: any) => (
                         <>
                           <div className="flex flex-col">
@@ -326,14 +345,31 @@ const App: React.FC = () => {
                                   {item?.response}
                                 </div>
                                 <div className="flex">
-                                  <i onClick={() => {
-                                    navigator.clipboard.writeText(
-                                      item?.response
-                                    );
-                                    toast.success("text copied.");
-                                  }} className="ri-clipboard-line text-base cursor-pointer"></i>
+                                  <i
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(
+                                        item?.response
+                                      );
+                                      toast.success("text copied.");
+                                    }}
+                                    className="ri-clipboard-line text-base cursor-pointer"
+                                  ></i>
 
-                                  {(pageLoading.loading && pageLoading.index === index) ? <Loader className="ms-2" /> : <i onClick={() => pageNoApiCall(item?.response, item?.pdfName, index)} className="ri-pages-line text-base cursor-pointer ms-2"></i>}
+                                  {pageLoading.loading &&
+                                  pageLoading.index === index ? (
+                                    <Loader className="ms-2" />
+                                  ) : (
+                                    <i
+                                      onClick={() =>
+                                        pageNoApiCall(
+                                          item?.response,
+                                          item?.pdfName,
+                                          index
+                                        )
+                                      }
+                                      className="ri-pages-line text-base cursor-pointer ms-2"
+                                    ></i>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -348,7 +384,7 @@ const App: React.FC = () => {
                       <input
                         type="text"
                         value={text}
-                        onChange={(e:any)=>setText(e.target.value)}
+                        onChange={(e: any) => setText(e.target.value)}
                         className="w-full py-2 pl-4 pr-10 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm "
                         placeholder="Message Design Verification AI..."
                         onKeyDown={(event: any) => handleKeyDown(event, "key")}
@@ -357,7 +393,10 @@ const App: React.FC = () => {
                         {loading ? (
                           <Loader />
                         ) : (
-                          <i className="ri-send-plane-fill w-5 h-5 text-gray-400" onClick={(event: any) => handleKeyDown(event, "click")}></i>
+                          <i
+                            className="ri-send-plane-fill w-5 h-5 text-gray-400"
+                            onClick={(event: any) => handleKeyDown("", "click")}
+                          ></i>
                         )}
                       </div>
                     </div>
@@ -381,7 +420,6 @@ const App: React.FC = () => {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>
-
               <div className="w-[100%] p-4 flex flex-col justify-between bg-[#F6F6F6] h-screen">
                 <div className=" p-3 h-[40vh] bg-white rounded-2xl flex flex-col">
                   <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
@@ -397,10 +435,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="h-[60vh] mt-4 bg-white rounded-2xl flex flex-col">
                   {pdfDataUrl ? (
-                    <PdfViewer
-                      url={getS3File(pdfDataUrl!)}
-                      initialPage={page}
-                    />
+                    <PdfViewer url={url} initialPage={page} />
                   ) : (
                     <div className="text-3xl flex justify-center items-center h-full text-blue-500 font-semibold cursor-pointer hover:underline">
                       {`Let's go! Upload your PDF file now.`}
