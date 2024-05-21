@@ -22,7 +22,8 @@ import { getRequest, patchRequest, postRequest } from "@/services/api";
 import PdfViewer from "@/components/PdfViewer/PdfViewer";
 import Cookies from "universal-cookie";
 import getS3File from "@/constants/get-aws-url";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import Loader from "@/components/Loader/loader";
 
 const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   const token = cookies.get("token");
+  const router = useRouter();
 
   if (!token) {
     redirect("/signin");
@@ -42,6 +44,11 @@ const App: React.FC = () => {
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [text , setText ] = useState<any>("")
+  const [pageLoading, setPageLoading] = useState<any>({
+    loading: false,
+    index: 0,
+  });
   const [page, setPage] = useState(0);
   const [promptListState, setPromptListState] = useState<any>([]);
   const [historyState, setHistoryState] = useState<any>([]);
@@ -110,29 +117,31 @@ const App: React.FC = () => {
     }
   };
 
-  const handleKeyDown = async (e: any) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = async (e: any, name: any) => {
+    if (((name === "key" && e.key === 'Enter') || name === "click") && e.target.value) {
+      setPage(0)
       setLoading(true);
       if (promptListState?.length === 0) {
-      try {
-        const response: any = await postRequest({
-          url: "/history/create",
-          data: {
-            summary: summaryState,
-            userId: userId,
-            pdfUrl: pdfDataUrl,
-            prompt: e.target.value
-          },
-        });
-        if (response?.data) {
-          fetchHistory()
-          setPromptListState(response?.data?.history?.history)
-          setActiveHistory(response?.data?.history?.history[0])
+        try {
+          const response: any = await postRequest({
+            url: "/history/create",
+            data: {
+              summary: summaryState,
+              userId: userId,
+              pdfUrl: pdfDataUrl,
+              prompt: e.target.value
+            },
+          });
+          if (response?.data) {
+            fetchHistory()
+            setPromptListState(response?.data?.history?.history)
+            setActiveHistory(response?.data?.history?.history[0])
+            setText("")
+          }
+          setLoading(false)
+        } catch (error) {
+          setLoading(false)
         }
-        setLoading(false)
-      } catch (error) {
-        setLoading(false)
-      }
       } else {
         try {
           const response: any = await patchRequest({
@@ -145,6 +154,7 @@ const App: React.FC = () => {
           });
           if (response?.data) {
             fetchHistory()
+            setText("")
             setPromptListState(response?.data?.history?.history)
           }
           setLoading(false)
@@ -155,20 +165,39 @@ const App: React.FC = () => {
     }
   };
 
-  const pageNoApiCall = async(response:any)=>{
-    const res: any = await postRequest({
-      url: "/history/get-pageno",
-      data: {
-        pdfUrl: pdfDataUrl,
-        response,
-      },
-    });
-    if (response?.data) {
-      setPage(res?.data?.pageNo);
+  const pageNoApiCall = async (response: any, pdfName: any, index: number) => {
+    setPageLoading({
+      loading: true,
+      index: index,
+    })
+    try {
+      const res: any = await postRequest({
+        url: "/history/get-pageno",
+        data: {
+          pdfUrl: pdfName,
+          response,
+        },
+      });
+      if (res?.data) {
+        setPage(res?.data?.pageNo);
+      }
+      setPageLoading({
+        loading: false,
+        index: 0,
+      })
+    } catch (error) {
+      setPageLoading({
+        loading: false,
+        index: 0,
+      })
     }
   }
 
-
+  const logoutHndler = () => {
+    cookies.remove("token")
+    cookies.remove("userId")
+    router.refresh()
+  }
 
   return (
     <>
@@ -206,13 +235,17 @@ const App: React.FC = () => {
                       {historyState?.map((item: any, index: number) => (
                         <div
                           key={index}
-                          className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black"
+                          className="w-[90%] border-2 border-gray-300 rounded-xl h-10 mt-3 flex justify-center hover:bg-slate-50 items-center cursor-pointer bg-[#DFE1E6] text-black truncate" title={Array.isArray(historyState) && historyState.length > 0 && (
+                            historyState[index]?.history[0]?.pdfName || ""
+                          )}
                           onClick={() => {
                             setHistoryHndler(index);
                           }}
                         >
                           {/* {item?.summary} */}
-                          this is a summury
+                          <span className="mx-2"> {Array.isArray(historyState) && historyState.length > 0 && (
+                            historyState[index]?.history[0]?.pdfName || ""
+                          )}</span>
                         </div>
                       ))}
                     </div>
@@ -227,12 +260,12 @@ const App: React.FC = () => {
                       Upgrade to plus
                     </div>
                     <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2">
-                      <i className="ri-exchange-line text-[#666D80] me-3 text-lg"></i>
-                      Update & FAQ
-                    </div>
-                    <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2">
                       <i className="ri-settings-5-line text-[#666D80] me-3 text-lg"></i>
                       Setting
+                    </div>
+                    <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2" onClick={logoutHndler}>
+                      <i className="ri-logout-box-r-line text-[#666D80] me-3 text-lg"></i>
+                      Logout
                     </div>
                   </div>
                 </div>
@@ -300,7 +333,7 @@ const App: React.FC = () => {
                                     toast.success("text copied.");
                                   }} className="ri-clipboard-line text-base cursor-pointer"></i>
 
-                                  <i onClick={()=>pageNoApiCall(item?.response)} className="ri-pages-line text-base cursor-pointer ms-2"></i>
+                                  {(pageLoading.loading && pageLoading.index === index) ? <Loader className="ms-2" /> : <i onClick={() => pageNoApiCall(item?.response, item?.pdfName, index)} className="ri-pages-line text-base cursor-pointer ms-2"></i>}
                                 </div>
                               </div>
                             </div>
@@ -314,15 +347,17 @@ const App: React.FC = () => {
                     <div className="mt-2 mb-3 relative">
                       <input
                         type="text"
+                        value={text}
+                        onChange={(e:any)=>setText(e.target.value)}
                         className="w-full py-2 pl-4 pr-10 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm "
                         placeholder="Message Design Verification AI..."
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(event: any) => handleKeyDown(event, "key")}
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer">
                         {loading ? (
-                          <div className="loader w-5 h-5 border-4 border-t-4 border-gray-400 rounded-full animate-spin"></div>
+                          <Loader />
                         ) : (
-                          <i className="ri-send-plane-fill w-5 h-5 text-gray-400"></i>
+                          <i className="ri-send-plane-fill w-5 h-5 text-gray-400" onClick={(event: any) => handleKeyDown(event, "click")}></i>
                         )}
                       </div>
                     </div>
