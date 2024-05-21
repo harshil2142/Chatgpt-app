@@ -49,6 +49,7 @@ export async function getRequest({
  }
   catch (error:any) {
     toast.error(error?.response?.data?.message)
+    throw new Error(`${error}`);
   }
 }
 
@@ -70,10 +71,11 @@ export async function postRequest({
     return response;
   } catch (error:any) {
     toast.error(error?.response?.data?.message)
+    throw new Error(`${error}`);
   }
 }
 
-export async function putRequest({
+export async function patchRequest({
   data,
   extraHeaders = {},
   url,
@@ -89,7 +91,8 @@ export async function putRequest({
       headers,
     });
     return response;
-  } catch (error) {
+  } catch (error:any) {
+    toast.error(error?.response?.data?.message)
     throw new Error(`${error}`);
   }
 }
@@ -111,7 +114,8 @@ export async function deleteRequest({
       data: data || {},
     });
     return response;
-  } catch (error) {
+  } catch (error:any) {
+    toast.error(error?.response?.data?.message)
     throw new Error(`${error}`);
   }
 }
