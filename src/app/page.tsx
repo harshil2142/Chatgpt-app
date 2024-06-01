@@ -65,6 +65,8 @@ const App: React.FC = () => {
       params: { userId, page: 1, size: 7 },
     });
     setHistoryState(response?.data?.data);
+    const length = response?.data?.data?.length;
+    setActiveHistory(response?.data?.data[length - 1]);
   };
 
   useEffect(() => {
@@ -152,7 +154,8 @@ const App: React.FC = () => {
             url: "/history/update",
             data: {
               historyId: activeHistory?._id,
-              chatHistory: promptListState?.slice(-3),
+              chatHistory: [],
+              // chatHistory: promptListState?.slice(-3),
               prompt: e.target.value || text,
             },
           });
