@@ -154,8 +154,8 @@ const App: React.FC = () => {
             url: "/history/update",
             data: {
               historyId: activeHistory?._id,
-              chatHistory: [],
-              // chatHistory: promptListState?.slice(-3),
+              // chatHistory: [],
+              chatHistory: promptListState?.slice(-1),
               prompt: e.target.value || text,
             },
           });
@@ -267,10 +267,10 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2">
+                    {/* <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2">
                       <i className="ri-delete-bin-line text-[#666D80] me-3 text-lg"></i>
                       Clear all conversations
-                    </div>
+                    </div> */}
                     <div className="w-full h-10 rounded-2xl mt-2 flex justify-start items-center cursor-pointer hover:bg-slate-100 px-2">
                       <i className="ri-upload-2-line text-[#666D80] me-3 text-lg"></i>
                       Upgrade to plus
@@ -302,6 +302,12 @@ const App: React.FC = () => {
                       ref={chatContainerRef}
                       className="my-3 p-3 h-[70vh] bg-white rounded-2xl flex flex-col overflow-y-auto"
                     >
+                      {summaryState && <div className="mb-4">
+                        <div className="mb-3 font-bold">Summary : </div>
+                        <div>
+                        {summaryState}
+                        </div>
+                      </div>}
                       {(promptListState || [])?.map((item: any, index: any) => (
                         <>
                           <div className="flex flex-col">
@@ -424,11 +430,11 @@ const App: React.FC = () => {
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>
               <div className="w-[100%] p-4 flex flex-col justify-between bg-[#F6F6F6] h-screen">
-                <div className=" p-3 h-[40vh] bg-white rounded-2xl flex flex-col">
-                  <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
+                <div className=" p-3 h-[20vh] bg-white rounded-2xl flex flex-col justify-center">
+                  {/* <div className="max-h-[25vh] overflow-y-auto text-base text-[#666D80]">
                     {summaryState}
-                  </div>
-                  <div className="mt-2 flex justify-center">
+                  </div> */}
+                  <div className="flex justify-center">
                     <FileUpload
                       setSummaryState={setSummaryState}
                       setPdfDataUrl={setPdfDataUrl}
@@ -436,7 +442,7 @@ const App: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="h-[60vh] mt-4 bg-white rounded-2xl flex flex-col">
+                <div className="h-[80vh] mt-4 bg-white rounded-2xl flex flex-col">
                   {pdfDataUrl ? (
                     <PdfViewer url={url} initialPage={page} />
                   ) : (

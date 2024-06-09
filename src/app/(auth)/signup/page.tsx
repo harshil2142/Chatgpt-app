@@ -114,7 +114,7 @@ export default function Signup() {
                       )}
                       title="Password"
                     />
-                    <InputWrapper
+                    {/* <InputWrapper
                       required
                       className={`rounded-lg border border-solid ${
                         get(errors, "name", false)
@@ -128,7 +128,7 @@ export default function Signup() {
                         <Input {...props} type="text" />
                       )}
                       title="Department Name"
-                    />
+                    /> */}
                   </div>
                   <Button disabled={loading} className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                   { loading ?  <div className="loader w-5 h-5 border-4 border-t-4 border-gray-400 rounded-full animate-spin"></div> :  "Sign up"}

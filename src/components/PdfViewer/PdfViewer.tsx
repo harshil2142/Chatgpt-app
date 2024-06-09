@@ -19,7 +19,7 @@ const PdfViewer = React.memo(
     }, [initialPage, jumpToPage]);
 
     return (
-      <div className="h-[60vh] w-full">
+      <div className="h-[80vh] w-full">
         <Worker
           workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}
         >
