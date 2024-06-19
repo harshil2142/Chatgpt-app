@@ -2,7 +2,9 @@
 
 import { redirect, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 import Cookies from "universal-cookie";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({
   children,
@@ -19,6 +21,7 @@ export default function RootLayout({
   return (
     <>
       <div>{children}</div>
+      <ToastContainer />
     </>
   );
 }
